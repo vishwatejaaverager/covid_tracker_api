@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:location/location.dart';
+import 'package:permission_handler/permission_handler.dart' as handler;
 
 class LocationWidget extends StatefulWidget {
   LocationPage createState()=> LocationPage();
@@ -12,16 +13,10 @@ class LocationPage extends State<LocationWidget>{
   PermissionStatus? _permissionGranted;
   LocationData? _locationData;
 
-   getLocation() async {
-    _serviceEnabled = await location.serviceEnabled();
-    if (!_serviceEnabled!) {
-      _serviceEnabled = await location.requestService();
-      if (!_serviceEnabled!) {
-        return;
-      }
-    }
-    _permissionGranted = await location.hasPermission();
-    if (_permissionGranted == PermissionStatus.denied) {
+
+  Future permi() async{
+    var status = await handler.Permission.location.status;
+    if(status.isDenied){
       _permissionGranted = await location.requestPermission();
       if (_permissionGranted != PermissionStatus.granted) {
         return;
@@ -31,7 +26,11 @@ class LocationPage extends State<LocationWidget>{
     setState(()  {
       _isGetLocation = true;
     });
+
   }
+
+
+
 
   @override
   Widget build(BuildContext context) {
@@ -60,7 +59,7 @@ class LocationPage extends State<LocationWidget>{
               fontWeight: FontWeight.bold,
               color: Colors.white),) : Container(),
         ElevatedButton(onPressed: () {
-          getLocation();
+          permi();
         },
             child: const Text(
               "Get Current Location", style: TextStyle(color: Colors.white),))
